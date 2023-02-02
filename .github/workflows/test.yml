@@ -1,0 +1,25 @@
+name: 'test'
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: submit
+  cancel-in-progress: true
+
+jobs:
+  submit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: check out repo for action code
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3
+      - name: rebase
+        uses: ./
+        with:
+          dispatch-token: ${{ github.token }}
+          dispatch-target: ${{ github.repository }}
+          branch: testing

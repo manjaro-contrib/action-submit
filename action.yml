@@ -1,0 +1,35 @@
+name: 'submit action'
+description: 'submits a package to the package database'
+
+inputs:
+  dispatch-token:
+    description: token required for dispatch
+    required: true
+  dispatch-target:
+    description: repository managing your packages
+    required: true
+  branch:
+    description: manjaro branch to publish against
+    required: false
+    default: "stable"
+  
+runs:
+  using: "composite"
+  steps:
+    - name: checkout
+      uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+    - name: determine versions
+      shell: bash
+      run: |
+        echo ${{ github.token }} | gh auth login --with-token
+        gh release list --limit 3 | grep ${{ inputs.branch }} | head -1 | awk '{print $1;}'
+        version="$(gh release list --limit 3 | grep ${{ inputs.branch }} | head -1 | awk '{print $1;}')"
+        echo "version=${version}" >> >$GITHUB_ENV
+    - name: dispatch
+      if: ${{ inputs.dispatch-token != '' && inputs.dispatch-target != '' }}
+      uses: peter-evans/repository-dispatch@26b39ed245ab8f31526069329e112ab2fb224588 # v2
+      with:
+        token: ${{ inputs.dispatch-token }}
+        repository: ${{ inputs.dispatch-target }}
+        event-type: package_update
+        client-payload: '{ "repository": "${{ github.repository }}", "version": "${{ env.version }}", "branch": "${{ inputs.branch }}" }'
