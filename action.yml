@@ -22,7 +22,7 @@ runs:
       shell: bash
       run: |
         echo ${{ github.token }} | gh auth login --with-token
-        release="$(gh release list --limit 3 | grep ${{ inputs.branch }} | head -1 | awk '{print $1;}')"
+        release="$(gh release list --limit 3 | grep "^${{ inputs.branch }}" | head -1 | awk '{print $1;}')"
         echo "release=${release}" >> $GITHUB_ENV
     - name: dispatch
       if: ${{ inputs.dispatch-token != '' && inputs.dispatch-target != '' }}
