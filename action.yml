@@ -22,10 +22,10 @@ runs:
       shell: bash
       run: |
         echo ${{ github.token }} | gh auth login --with-token
-        release="$(gh release list --limit 3 | grep "^${{ inputs.branch }}" | head -1 | awk '{print $1;}')"
+        release="$(gh release list --limit 3 | grep "^${{ inputs.branch }}" | head -1 | awk '{print $1;}' || true)"
         echo "release=${release}" >> $GITHUB_ENV
     - name: dispatch
-      if: ${{ inputs.dispatch-token != '' && inputs.dispatch-target != '' }}
+      if: ${{ env.release != '' && inputs.dispatch-token != '' && inputs.dispatch-target != '' }}
       uses: peter-evans/repository-dispatch@28959ce8df70de7be546dd1250a005dd32156697 # v4
       with:
         token: ${{ inputs.dispatch-token }}
